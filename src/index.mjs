@@ -6,7 +6,7 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
-const MockUsers = [
+const mockUsers = [
     {id: 1, username: "John Doe", display: "John"},
     {id: 2, username: "Jane Doe", display: "Jane"},
     {id: 3, username: "John Smith", display: "JohnS"},
@@ -26,17 +26,17 @@ app.get("/api/users", (req, res) => {
         query: { filter, value }, 
     } = req;
     if (filter && value) {
-        const findUser = MockUsers.filter(user => user[filter].toLowerCase().includes(value.toLowerCase()));
+        const findUser = mockUsers.filter(user => user[filter].toLowerCase().includes(value.toLowerCase()));
         return res.send(findUser);
     }
-    return res.send(MockUsers);
+    return res.send(mockUsers);
 });
 
 app.post("/api/users", (req, res) => {
     console.log(req.body);
-    const newUser = { id: MockUsers.length + 1, ...req.body };
-    MockUsers.push(newUser);
-    return res.status(201).send(MockUsers);
+    const newUser = { id: mockUsers.length + 1, ...req.body };
+    mockUsers.push(newUser);
+    return res.status(201).send(mockUsers);
 });  
 
 app.get("/api/users/:id", (req, res) => {
@@ -47,7 +47,7 @@ app.get("/api/users/:id", (req, res) => {
         return res.status(400).send({msg: "Invalid ID supplied"});
     }
 
-    const findUser = MockUsers.find(user => user.id === parsedId);
+    const findUser = mockUsers.find(user => user.id === parsedId);
     if (!findUser) {
         return res.status(404).send({msg: "User not found"});
     }
@@ -72,12 +72,30 @@ app.put("/api/users/:id", (req, res) => {
     if (isNaN(parsedId)) {
         return res.status(400).send({msg: "Invalid ID supplied"});
     }
-    const findUserIndex = MockUsers.findIndex((user) => user.id === parsedId);
+    const findUserIndex = mockUsers.findIndex((user) => user.id === parsedId);
     if (findUserIndex === -1) {
         return res.status(404).send({msg: "User not found"});
     }
-    MockUsers[findUserIndex] = { id: parsedId, ...body };
-    return res.status(200).send(MockUsers);
+    mockUsers[findUserIndex] = { id: parsedId, ...body };
+    return res.status(200).send(mockUsers);
+});
+
+app.patch("/api/users/:id", (req, res) => {
+    const {
+        body,
+        params: { id },
+    } = req;
+
+    const parsedId = parseInt(id);
+    if (isNaN(parsedId)) {
+        return res.status(400).send({msg: "Invalid ID supplied"});
+    }
+    const findUserIndex = mockUsers.findIndex((user) => user.id === parsedId);
+    if (findUserIndex === -1) {
+        return res.status(404).send({msg: "User not found"});
+    }
+    mockUsers[findUserIndex] = { ...mockUsers[findUserIndex], ...body };
+    return res.status(200).send(mockUsers);
 });
 
 app.listen(PORT, () => {
